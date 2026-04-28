@@ -23,7 +23,6 @@ export function ChatModal({ isOpen, triggerRef, onClose }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-          aria-hidden="true"
         >
           <motion.div
             className="chat-window glass"
@@ -31,12 +30,14 @@ export function ChatModal({ isOpen, triggerRef, onClose }) {
             aria-modal="true"
             aria-labelledby="chat-dialog-title"
             aria-describedby="chat-dialog-desc"
-            aria-hidden="false"
             tabIndex={-1}
             initial={{ scale: 0.9, y: 20, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.9, y: 20, opacity: 0 }}
-            onKeyDown={handleKeyDown}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') onClose();
+              handleKeyDown(e);
+            }}
           >
             {/* Header */}
             <div className="chat-header">

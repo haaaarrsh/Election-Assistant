@@ -1,15 +1,19 @@
 import PropTypes from 'prop-types';
+import { memo, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { ELECTION_STEPS } from '../data/electionData';
 
 /**
  * Displays full details for the currently selected election step.
+ * Memoized so it only re-renders when activeStep or id changes.
  */
-export function InfoPanel({ id, activeStep, onNext }) {
-  const step = ELECTION_STEPS[activeStep];
-  const hasNext = activeStep < ELECTION_STEPS.length - 1;
-  const nextStep = hasNext ? ELECTION_STEPS[activeStep + 1] : null;
+export const InfoPanel = memo(function InfoPanel({ id, activeStep, onNext }) {
+  const step = useMemo(() => ELECTION_STEPS[activeStep], [activeStep]);
+  const nextStep = useMemo(
+    () => (activeStep < ELECTION_STEPS.length - 1 ? ELECTION_STEPS[activeStep + 1] : null),
+    [activeStep],
+  );
   const StepIcon = step.icon;
 
   return (
@@ -54,7 +58,7 @@ export function InfoPanel({ id, activeStep, onNext }) {
             </ul>
           </div>
 
-          {hasNext && (
+          {nextStep && (
             <motion.button
               className="next-phase-btn"
               whileHover={{ background: 'rgba(255,255,255,0.05)' }}
@@ -68,7 +72,9 @@ export function InfoPanel({ id, activeStep, onNext }) {
       </AnimatePresence>
     </motion.section>
   );
-}
+});
+
+InfoPanel.displayName = 'InfoPanel';
 
 InfoPanel.propTypes = {
   id: PropTypes.string.isRequired,

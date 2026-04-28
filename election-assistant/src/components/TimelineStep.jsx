@@ -1,23 +1,36 @@
 import PropTypes from 'prop-types';
+import { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, CheckCircle2 } from 'lucide-react';
 import { ELECTION_STEPS } from '../data/electionData';
 
+const TOTAL_STEPS = ELECTION_STEPS.length;
+
 /**
  * A single step entry in the election timeline.
+ * Memoized to prevent re-renders when sibling steps change.
  */
-export function TimelineStep({ step, index, isActive, isCompleted, infoPanelId, onClick }) {
+export const TimelineStep = memo(function TimelineStep({
+  step,
+  index,
+  isActive,
+  isCompleted,
+  infoPanelId,
+  onClick,
+}) {
   const Icon = step.icon;
-  const stepStatus = isCompleted ? 'completed' : isActive ? 'current' : 'upcoming';
-  const totalSteps = ELECTION_STEPS.length;
+  const stepStatus = useMemo(
+    () => (isCompleted ? 'completed' : isActive ? 'current' : 'upcoming'),
+    [isActive, isCompleted],
+  );
 
   return (
-    <li>
+    <li aria-setsize={TOTAL_STEPS} aria-posinset={index + 1}>
       <motion.button
         className={`timeline-step${isActive ? ' active' : ''}${isCompleted ? ' completed' : ''}`}
         onClick={onClick}
         aria-current={isActive ? 'step' : undefined}
-        aria-label={`Step ${index + 1} of ${totalSteps}: ${step.title}. Status: ${stepStatus}.`}
+        aria-label={`Step ${index + 1} of ${TOTAL_STEPS}: ${step.title}. Status: ${stepStatus}.`}
         aria-controls={infoPanelId}
         aria-expanded={isActive}
         whileHover={{ scale: 1.02 }}
@@ -49,7 +62,9 @@ export function TimelineStep({ step, index, isActive, isCompleted, infoPanelId, 
       </motion.button>
     </li>
   );
-}
+});
+
+TimelineStep.displayName = 'TimelineStep';
 
 TimelineStep.propTypes = {
   step: PropTypes.shape({

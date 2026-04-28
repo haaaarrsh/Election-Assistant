@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FAQ_DATA } from '../data/electionData';
+import { getFaqAnswer } from '../utils/security';
+import { trackFaqQuestion } from '../utils/analytics';
 
 const INITIAL_MESSAGE = {
   type: 'bot',
@@ -25,16 +27,16 @@ export function useChat() {
   }, [messages, scrollToBottom]);
 
   const handleFaqClick = useCallback((question) => {
+    trackFaqQuestion(question);
     setMessages((prev) => [...prev, { type: 'user', text: question }]);
 
     const timerId = setTimeout(() => {
       setMessages((prev) => [
         ...prev,
-        { type: 'bot', text: FAQ_DATA[question] },
+        { type: 'bot', text: getFaqAnswer(FAQ_DATA, question) },
       ]);
     }, BOT_RESPONSE_DELAY_MS);
 
-    // Return cleanup in case component unmounts mid-timeout
     return () => clearTimeout(timerId);
   }, []);
 

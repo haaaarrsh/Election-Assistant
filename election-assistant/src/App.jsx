@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { MessageSquare } from 'lucide-react';
 
 import { ELECTION_STEPS } from './data/electionData';
+import { trackStepView, trackChatOpen } from './utils/analytics';
 import { TimelineStep } from './components/TimelineStep';
 import { InfoPanel } from './components/InfoPanel';
 import { ChatModal } from './components/ChatModal';
@@ -16,9 +17,23 @@ function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const chatTriggerRef = useRef(null);
 
-  const handleOpenChat = useCallback(() => setIsChatOpen(true), []);
+  const handleOpenChat = useCallback(() => {
+    trackChatOpen();
+    setIsChatOpen(true);
+  }, []);
+
   const handleCloseChat = useCallback(() => setIsChatOpen(false), []);
-  const handleNextStep = useCallback(() => setActiveStep((prev) => prev + 1), []);
+
+  const handleNextStep = useCallback(() => setActiveStep((prev) => {
+    const next = prev + 1;
+    trackStepView(ELECTION_STEPS[next].id, ELECTION_STEPS[next].title);
+    return next;
+  }), []);
+
+  const handleStepClick = useCallback((index) => {
+    trackStepView(ELECTION_STEPS[index].id, ELECTION_STEPS[index].title);
+    setActiveStep(index);
+  }, []);
 
   return (
     <div className="app-container">
@@ -55,7 +70,7 @@ function App() {
                   isActive={index === activeStep}
                   isCompleted={index < activeStep}
                   infoPanelId={INFO_PANEL_ID}
-                  onClick={() => setActiveStep(index)}
+                  onClick={() => handleStepClick(index)}
                 />
               ))}
             </ol>
